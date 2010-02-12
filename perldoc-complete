@@ -1,0 +1,69 @@
+#!/usr/bin/env perl
+use strict;
+use File::Spec::Functions qw( rel2abs catdir splitpath no_upwards );
+
+# There is only one tricky bit here: when there is only one completion, bash
+# will take that and append a space. But when completing to Foo:: we want bash
+# to leave the caret right after the :: and to make it do so, we make up a fake
+# 'Foo:: ' suggestion in `suggestion_from_name` to create artificial ambiguity.
+# However, if we also have a plain Foo suggestion anyway, then there is already
+# ambiguity and we can throw the fake suggestion away in `uniq`.
+
+sub uniq { my %seen; grep { ++$seen{$_.':: '}; not $seen{$_}++ } @_ }
+
+sub get_completion_word {
+	my $comp = substr $ENV{'COMP_LINE'}, 0, $ENV{'COMP_POINT'};
+	$comp =~ s/.*\h//;
+	return $comp;
+}
+
+sub slurp_dir {
+	opendir my $dir, shift or return;
+	no_upwards readdir $dir;
+}
+
+sub suggestion_from_name {
+	my ( $file_rx, $path, $name ) = @_;
+	return if not $name =~ /$file_rx/;
+	return $_.'::', $_.':: ' if -d catdir $path, $name;
+	return $1;
+}
+
+sub suggestions_from_path {
+	my ( $file_rx, $path ) = @_;
+	map { suggestion_from_name $file_rx, $path, $_ } slurp_dir $path;
+}
+
+die << "END_HELP" if not exists $ENV{'COMP_LINE'};
+
+To use, issue the following command in bash:
+
+\tcomplete -C perldoc-complete perldoc
+
+You probably want to put that line in your .bashrc
+
+END_HELP
+
+my $pkg = get_completion_word();
+
+( my $path = $pkg ) =~ s{::}{/}g;
+
+# if the package ended in a single colon,
+# then pretend there were two of them
+# and prepend a colon to all suggestions
+my $pfx = ( $path =~ s{:\z}{/} ) ? ':' : '';
+
+my ( undef, $subpath, $word ) = splitpath $path;
+
+my $file_rx = qr/\A(${\quotemeta $word}\w*)(?:\.pm|\.pod)?\z/;
+
+my $home = $ENV{'HOME'};
+
+print "$pfx$_\n" for
+	uniq
+	sort
+	map  { suggestions_from_path $file_rx, $_ }
+	uniq
+	map  { catdir $_, $subpath }
+	grep { $home ne rel2abs $_ }
+	@INC;

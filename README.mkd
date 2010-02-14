@@ -1,13 +1,12 @@
-# [A bash completion helper for perldoc](http://blogs.perl.org/users/aristotle/2010/02/a-bash-completion-helper-for-perldoc.html)
+For the back story, see [A bash completion helper for perldoc](http://blogs.perl.org/users/aristotle/2010/02/a-bash-completion-helper-for-perldoc.html).
 
-A month ago, Yanick Champoux wrote [a note about helpers for browsing the POD in your your local `perl` install](http://babyl.dyndns.org/techblog/2010/01/local-pod-browsing-using-podpomweb-via-the-cli.html "Yanick Champoux: Local POD browsing: using Pod::POM::Web via the CLI").
+To use it, save it somewhere in your `$PATH` and add the following line to your `.bashrc`:
 
-His first script is for firing up a browser pointed at a local POD web server, including starting one up if it’s not already running – not that useful to me, since I haven’t found myself actually using these servers very much, because of the console↔browser flipping that they entail. Plain old `perldoc` on a console just feels faster to juggle.
+    complete -C perldoc-complete perldoc
 
-However, he also includes another script: a completion helper for bash. This allows you to type something like `perldoc Cata<tab>` and have bash turn it into `perldoc Catalyst` for you. I used this script for mere hours before I realised it’s exactly the one thing I have always missed in Perl: a way to quickly and efficiently *browse* my local module library – the thing that all the POD web servers promised to give me, but couldn’t deliver in a convenient enough fashion for me to use routinely.
+Or do as I do, and add the following *two* lines:
 
-But as presented, his script has one limitation that annoyed me more than perhaps I should have let it: you have to use your system directory separator (ie. slash on Unixoid systems) en lieu of Perl’s `::` package separator. Ie.: you cannot type `perldoc Catalyst::Re<tab>`, it has to be `perldoc Catalyst/Re<tab>`.
+    alias pod=perldoc
+    complete -C perldoc-complete pod
 
-I thought that should be easy to fix. (Famous last words, I know.) It turned out to be harder than expected due the fact that completion in bash is hard-wired to understand trailing slashes as “the user might want to do more completion right after this” – we want `::` treated that way instead but there is no way to tell bash. I also ended up rewriting the script to be more (theoretically) portable, to not require non-core dependencies, and to work on much older perls than just 5.10.0, as Yanick’s code requires. Fastidious as I always am, I also spent quite a bit of effort rewriting the code to make it more beautiful and easy to skim and understand.
-
-So without further ado: [share](http://github.com/ap/perldoc-complete "perldoc-complete repository"), [and enjoy](http://github.com/ap/perldoc-complete/raw/master/perldoc-complete).
+That’s all; have fun.

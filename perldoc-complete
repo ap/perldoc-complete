@@ -34,15 +34,15 @@ sub suggestions_from_path {
 	map { suggestion_from_name $file_rx, $path, $_ } slurp_dir $path;
 }
 
-die << "END_HELP" if not exists $ENV{'COMP_LINE'};
+sub usage {
+	die map "\n$_\n", (
+		"To use, issue the following command in bash:",
+		"\tcomplete -C perldoc-complete perldoc",
+		"You probably want to put that line in your ~/.bashrc file.\n",
+	);
+}
 
-To use, issue the following command in bash:
-
-\tcomplete -C perldoc-complete perldoc
-
-You probably want to put that line in your .bashrc
-
-END_HELP
+usage() if not exists $ENV{'COMP_LINE'};
 
 my $pkg = get_completion_word();
 

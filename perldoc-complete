@@ -13,7 +13,7 @@ sub uniq { my %seen; grep { ++$seen{$_.':: '}; not $seen{$_}++ } @_ }
 
 sub get_completion_word {
 	my $comp = substr $ENV{'COMP_LINE'}, 0, $ENV{'COMP_POINT'};
-	$comp =~ s/.*\h//;
+	$comp =~ s/.*[ \t]//;
 	return $comp;
 }
 

@@ -48,7 +48,7 @@ my $pkg = get_completion_word();
 my @segment = split /::|:\z/, $pkg, -1;
 my $file_rx = qr/\A(${\quotemeta pop @segment}\w*)(?:\.pm|\.pod)?\z/;
 
-my $home = $ENV{'HOME'};
+my $home = rel2abs $ENV{'HOME'};
 
 # if the package ended in a single colon,
 # then prepend a colon to all suggestions

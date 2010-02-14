@@ -2,14 +2,7 @@
 use strict;
 use File::Spec::Functions qw( rel2abs catdir no_upwards );
 
-# There is only one tricky bit here: when there is only one completion, bash
-# will take that and append a space. But when completing to Foo:: we want bash
-# to leave the caret right after the :: and to make it do so, we make up a fake
-# 'Foo:: ' suggestion in `suggestion_from_name` to create artificial ambiguity.
-# However, if we also have a plain Foo suggestion anyway, then there is already
-# ambiguity and we can throw the fake suggestion away in `uniq`.
-
-sub uniq { my %seen; grep { ++$seen{$_.':: '}; not $seen{$_}++ } @_ }
+sub uniq { my %seen; grep { not $seen{$_}++ } @_ }
 
 sub get_completion_word {
 	my $comp = substr $ENV{'COMP_LINE'}, 0, $ENV{'COMP_POINT'};
@@ -25,7 +18,7 @@ sub slurp_dir {
 sub suggestion_from_name {
 	my ( $file_rx, $path, $name ) = @_;
 	return if not $name =~ /$file_rx/;
-	return $name.'::', $name.':: ' if -d catdir $path, $name;
+	return $name.'::' if -d catdir $path, $name;
 	return $1;
 }
 
@@ -54,11 +47,17 @@ my $home = rel2abs $ENV{'HOME'};
 # then prepend a colon to all suggestions
 my ( $pfx ) = $pkg =~ /(?<!:)(:)\z/;
 
-print "$pfx$_\n" for
-	uniq
-	sort
-	map  { suggestions_from_path $file_rx, $_ }
-	uniq
-	map  { catdir $_, @segment }
+my @suggestion =
+	uniq sort map { suggestions_from_path $file_rx, $_ }
+	uniq map { catdir $_, @segment }
 	grep { $home ne rel2abs $_ }
 	@INC;
+
+# if there is only one completion, bash will take that and append a space,
+# but after completing to Foo:: we want bash to leave the caret right there
+# so we make up an extra 'Foo:: ' suggestion to create artificial ambiguity
+if ( 1 == @suggestion and $suggestion[0] =~ /::\z/ ) {
+	push @suggestion, $suggestion[0] . ' ';
+}
+
+print "$pfx$_\n" for @suggestion;

@@ -25,7 +25,7 @@ sub slurp_dir {
 sub suggestion_from_name {
 	my ( $file_rx, $path, $name ) = @_;
 	return if not $name =~ /$file_rx/;
-	return $_.'::', $_.':: ' if -d catdir $path, $name;
+	return $name.'::', $name.':: ' if -d catdir $path, $name;
 	return $1;
 }
 

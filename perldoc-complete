@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use strict;
-use File::Spec::Functions qw( rel2abs catdir splitpath no_upwards );
+use File::Spec::Functions qw( rel2abs catdir no_upwards );
 
 # There is only one tricky bit here: when there is only one completion, bash
 # will take that and append a space. But when completing to Foo:: we want bash
@@ -45,25 +45,20 @@ sub usage {
 usage() if not exists $ENV{'COMP_LINE'};
 
 my $pkg = get_completion_word();
-
-( my $path = $pkg ) =~ s{::}{/}g;
-
-# if the package ended in a single colon,
-# then pretend there were two of them
-# and prepend a colon to all suggestions
-my $pfx = ( $path =~ s{:\z}{/} ) ? ':' : '';
-
-my ( undef, $subpath, $word ) = splitpath $path;
-
-my $file_rx = qr/\A(${\quotemeta $word}\w*)(?:\.pm|\.pod)?\z/;
+my @segment = split /::|:\z/, $pkg, -1;
+my $file_rx = qr/\A(${\quotemeta pop @segment}\w*)(?:\.pm|\.pod)?\z/;
 
 my $home = $ENV{'HOME'};
+
+# if the package ended in a single colon,
+# then prepend a colon to all suggestions
+my ( $pfx ) = $pkg =~ /(?<!:)(:)\z/;
 
 print "$pfx$_\n" for
 	uniq
 	sort
 	map  { suggestions_from_path $file_rx, $_ }
 	uniq
-	map  { catdir $_, $subpath }
+	map  { catdir $_, @segment }
 	grep { $home ne rel2abs $_ }
 	@INC;

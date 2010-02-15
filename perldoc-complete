@@ -34,17 +34,12 @@ sub get_package_suggestions {
 
 	my $home = rel2abs $ENV{'HOME'};
 
-	my @src = @INC;
-
-	if ( $pkg =~ /^perl/ ) {
-		$_ = catdir $_, 'pod' for @src;
-	}
-
 	my @suggestion =
 		map { suggestions_from_path $file_rx, $_ }
 		uniq map { catdir $_, @segment }
 		grep { $home ne rel2abs $_ }
-		@src;
+		map { $_, ( catdir $_, 'pod' ) }
+		@INC;
 
 	# if there is only one completion, bash will take that and append a space,
 	# but after completing to Foo:: we want bash to leave the caret right there
@@ -55,6 +50,9 @@ sub get_package_suggestions {
 
 	@suggestion = map { ":$_" } @suggestion
 		if $pkg =~ /(?<!:):\z/;
+
+	@suggestion = grep { not /^perl/ } @suggestion
+		if $pkg !~ /\Aperl/;
 
 	return @suggestion;
 }

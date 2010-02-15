@@ -51,7 +51,7 @@ sub get_package_suggestions {
 	@suggestion = map { ":$_" } @suggestion
 		if $pkg =~ /(?<!:):\z/;
 
-	@suggestion = grep { not /^perl/ } @suggestion
+	@suggestion = grep { not /^perl./ } @suggestion
 		if $pkg !~ /\Aperl/;
 
 	return @suggestion;

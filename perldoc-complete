@@ -47,11 +47,17 @@ my $home = rel2abs $ENV{'HOME'};
 # then prepend a colon to all suggestions
 my ( $pfx ) = $pkg =~ /(?<!:)(:)\z/;
 
+my @src = @INC;
+
+if ( $pkg =~ /^perl/ ) {
+	$_ = catdir $_, 'pod' for @src;
+}
+
 my @suggestion =
 	uniq sort map { suggestions_from_path $file_rx, $_ }
 	uniq map { catdir $_, @segment }
 	grep { $home ne rel2abs $_ }
-	@INC;
+	@src;
 
 # if there is only one completion, bash will take that and append a space,
 # but after completing to Foo:: we want bash to leave the caret right there

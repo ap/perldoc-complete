@@ -1,6 +1,9 @@
-For the back story, see [A bash completion helper for perldoc](http://blogs.perl.org/users/aristotle/2010/02/a-bash-completion-helper-for-perldoc.html).
+# A bash completion helper for perldoc
 
-To use it, save it somewhere in your `$PATH` and add the following line to your `.bashrc`:
+Check [the back story][1] if you want the details about this.
+
+Using it as as simple as saving it somewhere in your `$PATH`
+and adding the following line to your `.bashrc`:
 
     complete -C perldoc-complete perldoc
 
@@ -9,4 +12,10 @@ Or do as I do, and add the following *two* lines:
     alias pod=perldoc
     complete -C perldoc-complete pod
 
-That’s all; have fun.
+That’s all; now you can hit the Tab key at some point after
+typing `perldoc` or `pod` and get some sensible suggestions.
+Or hit the Tab key just to browse your module library.
+
+Have fun.
+
+[1]: http://blogs.perl.org/mt/mt-search.fcgi?blog_id=15;tag=perldoc-complete

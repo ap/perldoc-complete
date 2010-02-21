@@ -5,12 +5,12 @@ Check [the back story][1] if you want the details about this.
 Using it as as simple as saving it somewhere in your `$PATH`
 and adding the following line to your `.bashrc`:
 
-    complete -C perldoc-complete perldoc
+    complete -C perldoc-complete -o nospace -o default perldoc
 
 Or do as I do, and add the following *two* lines:
 
     alias pod=perldoc
-    complete -C perldoc-complete pod
+    complete -C perldoc-complete -o nospace -o default pod
 
 That’s all; now you can hit the Tab key at some point after
 typing `perldoc` or `pod` and get some sensible suggestions.

@@ -33,20 +33,15 @@ sub get_package_suggestions {
 	my $file_rx = qr/\A(${\quotemeta pop @segment}\w*)(?:\.pm|\.pod)?\z/;
 
 	my $home = rel2abs $ENV{'HOME'};
+	my $cwd = rel2abs do { require Cwd; Cwd::cwd() };
 
 	my @suggestion =
 		map { suggestions_from_path $file_rx, $_ }
 		uniq map { catdir $_, @segment }
-		grep { $home ne rel2abs $_ }
+		grep { $home ne $_ and $cwd ne $_ }
 		map { $_, ( catdir $_, 'pod' ) }
+		map { rel2abs $_ }
 		@INC;
-
-	# if there is only one completion, bash will take that and append a space,
-	# but after completing to Foo:: we want bash to leave the caret right there
-	# so we make up an extra 'Foo:: ' suggestion to create artificial ambiguity
-	if ( 1 == @suggestion and $suggestion[0] =~ /::\z/ ) {
-		push @suggestion, $suggestion[0] . ' ';
-	}
 
 	@suggestion = map { ":$_" } @suggestion
 		if $pkg =~ /(?<!:):\z/;
@@ -91,7 +86,7 @@ sub get_function_suggestions {
 sub usage {
 	die map "\n$_\n", (
 		"To use, issue the following command in bash:",
-		"\tcomplete -C perldoc-complete perldoc",
+		"\tcomplete -C perldoc-complete -o nospace -o default perldoc",
 		"You probably want to put that line in your ~/.bashrc file.\n",
 	);
 }

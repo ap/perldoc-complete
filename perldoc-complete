@@ -43,14 +43,15 @@ sub get_package_suggestions {
 		map { rel2abs $_ }
 		@INC;
 
-	@suggestion = map { ":$_" } @suggestion
-		if $pkg =~ /(?<!:):\z/;
-
-	if ( $pkg !~ /\Ap/ ) {
-		my $num_hidden = @suggestion;
-		@suggestion = grep { not /^perl./ } @suggestion;
-		$num_hidden -= @suggestion;
-		push @suggestion, "perl* ($num_hidden hidden)" if $pkg eq '';
+	# fixups
+	if ( $pkg eq '' ) {
+		my $total = @suggestion;
+		@suggestion = grep { not /^perl/ } @suggestion;
+		my $num_hidden = $total - @suggestion;
+		push @suggestion, "perl* ($num_hidden hidden)" if $num_hidden;
+	}
+	elsif ( $pkg =~ /(?<!:):\z/ ) {
+		@suggestion = map { ":$_" } @suggestion;
 	}
 
 	return @suggestion;

@@ -83,10 +83,12 @@ sub get_function_suggestions {
 	my ( $func ) = @_;
 
 	my $perlfunc;
-	for ( @INC, undef ) {
+	INCPATH: for ( @INC, undef ) {
 		return if not defined;
-		$perlfunc = catfile $_, qw( pod perlfunc.pod );
-		last if -r $perlfunc;
+		for my $dir ( qw( pod pods ) ) {
+			$perlfunc = catfile $_, $dir, 'perlfunc.pod';
+			last INCPATH if -r $perlfunc;
+		}
 	}
 
 	open my $fh, '<', $perlfunc or return;

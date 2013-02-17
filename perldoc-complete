@@ -61,7 +61,7 @@ sub get_package_suggestions {
 		map { suggestions_from_path $file_rx, $_ }
 		uniq map { catdir $_, @segment }
 		grep { $home ne $_ and $cwd ne $_ }
-		map { $_, ( catdir $_, 'pod' ) }
+		map { $_, ( catdir $_, 'pods' ), ( catdir $_, 'pod' ) }
 		map { rel2abs $_ }
 		@INC;
 
@@ -85,7 +85,7 @@ sub get_function_suggestions {
 	my $perlfunc;
 	INCPATH: for ( @INC, undef ) {
 		return if not defined;
-		for my $dir ( qw( pod pods ) ) {
+		for my $dir ( qw( pods pod ) ) {
 			$perlfunc = catfile $_, $dir, 'perlfunc.pod';
 			last INCPATH if -r $perlfunc;
 		}
